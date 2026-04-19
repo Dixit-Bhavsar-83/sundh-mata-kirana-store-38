@@ -41,7 +41,7 @@ function renderProducts(products) {
         return `
         <div class="product-card bg-white p-3 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col" onclick="openProductDetail(${p.id})">
             <div class="w-full h-32 flex items-center justify-center mb-3 overflow-hidden rounded-2xl bg-slate-50">
-                <img src="${p.img || 'https://via.placeholder.com/150'}" class="h-24 w-24 object-contain">
+               <img src="${p.img1 || p.img || 'https://via.placeholder.com/150'}" class="h-24 w-24 object-contain">
             </div>
             <h3 class="font-bold text-xs text-slate-800 truncate px-1">${p.name}</h3>
             <p class="text-[9px] text-zinc-400 font-bold px-1 mb-2 uppercase">${p.qty || '1'} ${p.unit || 'unit'}</p>
@@ -97,7 +97,7 @@ function updateBadge() {
 
 function openProductDetail(id) {
     selectedProduct = allProducts.find(p => p.id === id);
-    document.getElementById('detailImg').src = selectedProduct.img;
+    document.getElementById('detailImg').src = selectedProduct.img1 || selectedProduct.img;
     document.getElementById('detailName').innerText = selectedProduct.name;
     document.getElementById('detailPrice').innerText = `₹${selectedProduct.price}`;
     document.getElementById('detailQty').innerText = `${selectedProduct.qty} ${selectedProduct.unit}`;
@@ -117,7 +117,10 @@ function showScreen(id) {
 function setupSearch() {
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const val = e.target.value.toLowerCase();
-        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(val) || (p.nickname && p.nickname.toLowerCase().includes(val)));
+        const filtered = allProducts.filter(p => 
+    p.name.toLowerCase().includes(val) || 
+    (p.nick && p.nick.toLowerCase().includes(val))  // nickname → nick
+);
         renderProducts(filtered);
     });
 }
