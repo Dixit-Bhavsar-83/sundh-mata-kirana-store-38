@@ -12,7 +12,7 @@ function updateCartUI() {
         total += item.price * item.qty;
         return `
         <div class="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <img src="${item.img}" class="w-16 h-16 object-contain">
+           <img src="${item.img1 || item.img || ''}" class="w-16 h-16 object-contain">
             <div class="flex-1"><h4 class="font-bold text-sm">${item.name}</h4><p class="text-orange-500 font-black">₹${item.price}</p></div>
             <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border">
                 <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 bg-white rounded-lg"><i class="fas fa-minus text-[8px]"></i></button>
