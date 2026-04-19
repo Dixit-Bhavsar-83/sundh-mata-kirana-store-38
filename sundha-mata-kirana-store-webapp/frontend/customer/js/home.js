@@ -117,10 +117,7 @@ function showScreen(id) {
 function setupSearch() {
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const val = e.target.value.toLowerCase();
-        const filtered = allProducts.filter(p => 
-    p.name.toLowerCase().includes(val) || 
-    (p.nick && p.nick.toLowerCase().includes(val))  // nickname → nick
-);
+        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(val) || (p.nickname && p.nickname.toLowerCase().includes(val)));
         renderProducts(filtered);
     });
 }
