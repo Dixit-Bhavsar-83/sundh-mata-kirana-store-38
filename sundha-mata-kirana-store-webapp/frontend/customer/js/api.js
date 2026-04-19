@@ -1,8 +1,11 @@
 // C:\Users\HP\Documents\sundha-mata-kirana-store-webapp\frontend\customer\js\api.js
 
-fetch(`${BASE_URL}/products`)
+const BASE_URL = "/api";
 
+// ✅ Bas itna — floating fetch hata do
 const API = {
+
+
     // Customer Registration
     registerCustomer: async (userData) => {
         try {
