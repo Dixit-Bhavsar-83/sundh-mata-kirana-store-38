@@ -62,15 +62,14 @@
 
 <script>
     function goTo(type) {
-        // Simple animation
         const btn = event.currentTarget;
         btn.style.transform = "scale(0.9)";
         
         setTimeout(() => {
-            // '/' lagane se path hamesha root se start hoga
-            if(type === 'customer') window.location.href = "/frontend/customer/login.html";
-            if(type === 'owner') window.location.href = "/frontend/owner/login.html";
-            if(type === 'panel') window.location.href = "/frontend/penal/penal.html";
+            // ✅ /frontend/ mat lagao - seedha path likho
+            if(type === 'customer') window.location.href = "/customer/login.html";
+            if(type === 'owner') window.location.href = "/owner/login.html";
+            if(type === 'panel') window.location.href = "/penal/penal.html";
         }, 200);
     }
 </script>
