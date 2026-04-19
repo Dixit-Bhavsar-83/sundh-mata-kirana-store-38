@@ -4,7 +4,8 @@ users_db = {}
 
 user_bp = Blueprint('user_routes', __name__)
 
-@user_bp.route('/api/register', methods=['POST'])
+# /api/register → /api/user/register
+@user_bp.route('/api/user/register', methods=['POST'])
 def register_customer():
     data = request.json
     phone = data.get('phone')
