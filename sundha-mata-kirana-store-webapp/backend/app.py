@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from routes.auth_routes import auth_bp
+from routes.user_routes import user_bp
+
 import os
 
 app = Flask(__name__)
@@ -15,6 +17,7 @@ FRONTEND_FOLDER = os.path.join(BASE_DIR, "..", "frontend")
 products_db = []
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(user_bp)
 
 @app.route("/")
 def serve_index():
