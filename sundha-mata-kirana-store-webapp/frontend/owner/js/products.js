@@ -3,6 +3,11 @@ let inventory = JSON.parse(localStorage.getItem('products')) || [];
 let editMode = false;
 let editId = null;
 
+// Development mein Flask use karo, Live Server nahi!
+const BASE_URL = window.location.port === '5500' 
+    ? 'http://localhost:5000/api'  // agar galti se 5500 pe khula
+    : '/api';                       // Flask pe sahi kaam karega
+
 /* =========================
    MODAL CONTROL
 ========================= */
@@ -128,9 +133,9 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
     };
 
     try {
-        const url = editMode
-            ? `update-product/${editId}`
-            : `api/admin/add-product`;
+       const url = editMode
+    ? `/api/admin/update-product/${editId}`
+    : `/api/admin/add-product`;
 
         const method = editMode ? "PUT" : "POST";
 
