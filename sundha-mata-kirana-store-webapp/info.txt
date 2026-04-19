@@ -1,0 +1,28 @@
+
+flask install :     pip install flask flask-cors
+
+
+backand and run : cd backend
+python app.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+username :  admin_sundha
+password : store123

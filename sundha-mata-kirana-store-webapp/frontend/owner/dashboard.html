@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Dashboard | Sundha Mata Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .slide-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .slide-container::-webkit-scrollbar { display: none; }
+        .slide { min-width: 100%; scroll-snap-align: start; padding: 1rem; }
+        .nav-active { color: #f97316; transform: translateY(-5px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 overflow-x-hidden">
+
+    <header class="p-5 flex justify-between items-center bg-white/70 sticky top-0 z-40 backdrop-blur-md">
+        <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Welcome Boss</p>
+            <h1 class="text-2xl font-black text-slate-800">Dashboard</h1>
+        </div>
+        <div class="relative">
+            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 border-2 border-orange-200">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+        </div>
+    </header>
+
+    <div class="slide-container">
+        <div class="slide">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span class="w-2 h-6 bg-orange-500 rounded-full"></span> Today's Pulse
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-orange-500 to-red-600 p-4 rounded-3xl shadow-lg shadow-orange-200 text-white col-span-2">
+                    <p class="text-sm opacity-80">Today Earnings</p>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-xl font-bold">₹</span>
+                        <h2 class="text-4xl font-black counter" data-target="4250">0</h2>
+                    </div>
+                    <p class="text-xs mt-2 bg-white/20 w-fit px-2 py-1 rounded-full">+12% from yesterday</p>
+                </div>
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Orders</p>
+                    <h2 class="text-2xl font-black text-slate-800 counter" data-target="28">0</h2>
+                </div>
+                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Pending</p>
+                    <h2 class="text-2xl font-black text-orange-500 counter" data-target="5">0</h2>
+                </div>
+            </div>
+
+         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h3 class="font-bold text-slate-800">Sales Analytics</h3>
+            <p class="text-[10px] text-green-500 font-bold">● Live from Store</p>
+        </div>
+        <i class="fa-solid fa-chart-line text-orange-500"></i>
+    </div>
+    
+    <div class="relative h-[250px] w-full">
+        <canvas id="salesChart"></canvas>
+    </div>
+</div>
+        
+        <div class="slide">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span class="w-2 h-6 bg-blue-500 rounded-full"></span> Weekly Insights
+            </h2>
+            <div class="bg-blue-600 p-6 rounded-3xl text-white mb-6">
+                <p>Weekly Revenue</p>
+                <h2 class="text-4xl font-black">₹28,400</h2>
+            </div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                <canvas id="weeklyChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-50">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <a href="#" class="flex flex-col items-center items-center text-orange-500 scale-110">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Home</span>
+            </a>
+            <a href="orders.html" class="flex flex-col items-center text-slate-400 hover:text-orange-500 transition">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Orders</span>
+            </a>
+
+            <a href="products.html" class="flex flex-col items-center text-slate-400 hover:text-orange-500 transition">
+                <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Stock</span>
+            </a>
+            <a href="settings.html" class="flex flex-col items-center text-slate-400 hover:text-orange-500 transition">
+                <i class="fa-solid fa-user-gear text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
