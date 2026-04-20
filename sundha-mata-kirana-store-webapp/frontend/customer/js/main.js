@@ -51,6 +51,8 @@ continueBtn.onclick = async (e) => {
         address: addressArea.value
     };
 
+    document.body.style.zoom = "90%";
+    
     console.log("Sending Data:", userData); // Check karne ke liye
 
     try {
