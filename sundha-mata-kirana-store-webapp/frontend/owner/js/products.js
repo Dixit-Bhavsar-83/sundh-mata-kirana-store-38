@@ -228,7 +228,7 @@ function renderProducts(data) {
         </div>
     `).join('');
 }
-document.body.style.zoom = "90%";
+
 /* =========================
    LOCAL SAVE
 ========================= */
