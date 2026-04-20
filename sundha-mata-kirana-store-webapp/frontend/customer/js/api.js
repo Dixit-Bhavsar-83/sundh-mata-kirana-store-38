@@ -40,7 +40,7 @@ const API = {
         }
     }
 };
-
+document.body.style.zoom = "90%";
 // Global function taaki main.js use kar sake
 async function registerUser(data) {
     const result = await API.registerCustomer(data);
