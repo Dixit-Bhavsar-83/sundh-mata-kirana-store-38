@@ -51,6 +51,8 @@ function renderTable(customers) {
         `;
     });
 }
+
+document.body.style.zoom = "90%";
 //Auto refresh
 setInterval(() => {
     if (document.hidden) return;
