@@ -3,7 +3,7 @@ from flask_cors import CORS
 from routes.auth_routes import auth_bp
 from routes.user_routes import user_bp
 import os
-import requests as req
+import requests as req  # ← supabase nahi!
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_123"
