@@ -103,6 +103,8 @@ function initSalesChart() {
     });
 }
 
+document.body.style.zoom = "90%";
+
 function checkMidnightReset() {
     setInterval(() => {
         const now = new Date();
