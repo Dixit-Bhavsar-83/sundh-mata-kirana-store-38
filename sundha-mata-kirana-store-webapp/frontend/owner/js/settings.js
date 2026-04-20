@@ -124,7 +124,7 @@ function importData() {
 
     input.click();
 }
-
+document.body.style.zoom = "90%";
 function clearAllData() {
     if(confirm("Are you sure? This will delete everything!")) {
         localStorage.clear();
