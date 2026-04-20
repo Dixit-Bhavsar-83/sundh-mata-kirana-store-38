@@ -2,8 +2,8 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from routes.auth_routes import auth_bp
 from routes.user_routes import user_bp
-from supabase import create_client
 import os
+import requests as req
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_123"
@@ -13,10 +13,18 @@ CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_FOLDER = os.path.join(BASE_DIR, "..", "frontend")
 
-# ✅ Supabase Connect
+# ✅ Supabase Config
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json"
+}
+
+def db(table):
+    return f"{SUPABASE_URL}/rest/v1/{table}"
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
@@ -29,7 +37,6 @@ def serve_index():
 def serve_files(path):
     return send_from_directory(FRONTEND_FOLDER, path)
 
-# ✅ Keep-Alive
 @app.route("/api/ping", methods=["GET"])
 def ping():
     return jsonify({"status": "alive"}), 200
@@ -48,7 +55,7 @@ def add_product():
         "img": data.get("img") or data.get("img1", ""),
         "img2": data.get("img2", "")
     }
-    supabase.table("products").upsert(product).execute()
+    res = req.post(db("products"), json=product, headers={**HEADERS, "Prefer": "return=representation"})
     return jsonify({"status": "success", "data": product}), 201
 
 # ✅ Update Product
@@ -64,19 +71,19 @@ def update_product(p_id):
         "img": data.get("img") or data.get("img1", ""),
         "img2": data.get("img2", "")
     }
-    supabase.table("products").update(product).eq("id", p_id).execute()
+    req.patch(f"{db('products')}?id=eq.{p_id}", json=product, headers=HEADERS)
     return jsonify({"status": "success"}), 200
 
 # ✅ Get All Products
 @app.route("/api/products", methods=["GET"])
 def get_products():
-    res = supabase.table("products").select("*").order("id", desc=True).execute()
-    return jsonify({"status": "success", "data": res.data}), 200
+    res = req.get(f"{db('products')}?order=id.desc", headers=HEADERS)
+    return jsonify({"status": "success", "data": res.json()}), 200
 
 # ✅ Delete Product
 @app.route("/api/admin/delete-product/<int:p_id>", methods=["DELETE"])
 def delete_product(p_id):
-    supabase.table("products").delete().eq("id", p_id).execute()
+    req.delete(f"{db('products')}?id=eq.{p_id}", headers=HEADERS)
     return jsonify({"status": "success"}), 200
 
 if __name__ == "__main__":
