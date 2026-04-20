@@ -175,6 +175,8 @@ function buyNow() {
     }
 }
 
+document.body.style.zoom = "90%";
+
 function showSuccessScreen() {
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
