@@ -3,7 +3,9 @@ from flask_cors import CORS
 from routes.auth_routes import auth_bp
 from routes.user_routes import user_bp
 import os
+import uuid
 import requests as req
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_123"
@@ -16,7 +18,6 @@ FRONTEND_FOLDER = os.path.join(BASE_DIR, "..", "frontend")
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-# ✅ Debug - startup pe check karo
 print("SUPABASE_URL:", SUPABASE_URL)
 print("SUPABASE_KEY:", SUPABASE_KEY[:20] if SUPABASE_KEY else "MISSING!")
 
@@ -59,12 +60,11 @@ def add_product():
         "img2": data.get("img2", "")
     }
     res = req.post(
-        db("products"), 
-        json=product, 
+        db("products"),
+        json=product,
         headers={**HEADERS, "Prefer": "return=representation"}
     )
     print("ADD STATUS:", res.status_code)
-    print("ADD RESPONSE:", res.text)
     return jsonify({"status": "success", "data": product}), 201
 
 # ✅ Update Product
@@ -81,38 +81,175 @@ def update_product(p_id):
         "img2": data.get("img2", "")
     }
     res = req.patch(
-        f"{db('products')}?id=eq.{p_id}", 
-        json=product, 
+        f"{db('products')}?id=eq.{p_id}",
+        json=product,
         headers=HEADERS
     )
-    print("UPDATE STATUS:", res.status_code)
-    print("UPDATE RESPONSE:", res.text)
     return jsonify({"status": "success"}), 200
 
 # ✅ Get All Products
 @app.route("/api/products", methods=["GET"])
 def get_products():
     res = req.get(
-        f"{db('products')}?order=id.desc", 
+        f"{db('products')}?order=id.desc",
         headers=HEADERS
     )
-    print("GET STATUS:", res.status_code)
-    print("GET RESPONSE:", res.text[:200])
-    
     if res.status_code != 200:
         return jsonify({"status": "error", "message": res.text}), 500
-        
     return jsonify({"status": "success", "data": res.json()}), 200
 
 # ✅ Delete Product
 @app.route("/api/admin/delete-product/<int:p_id>", methods=["DELETE"])
 def delete_product(p_id):
     res = req.delete(
-        f"{db('products')}?id=eq.{p_id}", 
+        f"{db('products')}?id=eq.{p_id}",
         headers=HEADERS
     )
-    print("DELETE STATUS:", res.status_code)
     return jsonify({"status": "success"}), 200
+
+# ============================================================
+# ✅ ORDERS — Place Order (Customer Side)
+# ============================================================
+@app.route("/api/orders", methods=["POST"])
+def place_order():
+    data = request.json
+    order_id = "ORD-" + str(uuid.uuid4())[:6].upper()
+    now_ist = (datetime.utcnow() + timedelta(hours=5, minutes=30)).isoformat()
+
+    order = {
+        "id": order_id,
+        "customer_name": data.get("customer_name", data.get("name", "")),
+        "customer_phone": data.get("customer_phone", data.get("phone", "")),
+        "customer_address": data.get("customer_address", data.get("address", "")),
+        "items": data.get("items", []),
+        "total": data.get("total", 0),
+        "status": "PENDING",
+        "created_at": now_ist
+    }
+
+    res = req.post(
+        db("orders"),
+        json=order,
+        headers={**HEADERS, "Prefer": "return=representation"}
+    )
+    print("ORDER PLACE STATUS:", res.status_code, res.text[:200])
+    return jsonify({"status": "success", "data": order}), 201
+
+# ============================================================
+# ✅ ORDERS — Get Orders (Last 3 Days Only)
+# ============================================================
+@app.route("/api/orders", methods=["GET"])
+def get_orders():
+    three_days_ago = (datetime.utcnow() - timedelta(days=3)).isoformat()
+
+    res = req.get(
+        f"{db('orders')}?created_at=gte.{three_days_ago}&order=created_at.desc",
+        headers=HEADERS
+    )
+    if res.status_code != 200:
+        return jsonify({"status": "error", "message": res.text}), 500
+
+    orders = res.json()
+    return jsonify({"status": "success", "data": orders}), 200
+
+# ============================================================
+# ✅ ORDERS — Update Status (PENDING → ACCEPTED)
+# ============================================================
+@app.route("/api/orders/<order_id>/status", methods=["PATCH"])
+def update_order_status(order_id):
+    data = request.json
+    new_status = data.get("status", "ACCEPTED")
+
+    res = req.patch(
+        f"{db('orders')}?id=eq.{order_id}",
+        json={"status": new_status},
+        headers=HEADERS
+    )
+    print(f"STATUS UPDATE [{order_id}] → {new_status} :", res.status_code)
+    return jsonify({"status": "success"}), 200
+
+# ============================================================
+# ✅ DASHBOARD — Today's Stats (Earnings, Orders, Pending)
+# ============================================================
+@app.route("/api/dashboard/stats", methods=["GET"])
+def dashboard_stats():
+    # IST today start
+    now_ist = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    today_start = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start_utc = (today_start - timedelta(hours=5, minutes=30)).isoformat()
+
+    res = req.get(
+        f"{db('orders')}?created_at=gte.{today_start_utc}&order=created_at.asc",
+        headers=HEADERS
+    )
+
+    orders = res.json() if res.status_code == 200 else []
+
+    total_orders = len(orders)
+    pending = sum(1 for o in orders if o.get("status") == "PENDING")
+    # Earnings = only accepted orders
+    earnings = sum(o.get("total", 0) for o in orders if o.get("status") == "ACCEPTED")
+
+    # Hourly breakdown for live chart
+    hourly = {}
+    for o in orders:
+        created = o.get("created_at", "")
+        if not created:
+            continue
+        try:
+            dt = datetime.fromisoformat(created.replace("Z", ""))
+            dt_ist = dt + timedelta(hours=5, minutes=30)
+            hour_key = dt_ist.hour
+            if hour_key not in hourly:
+                hourly[hour_key] = {"orders": 0, "earnings": 0}
+            hourly[hour_key]["orders"] += 1
+            if o.get("status") == "ACCEPTED":
+                hourly[hour_key]["earnings"] += o.get("total", 0)
+        except Exception:
+            pass
+
+    return jsonify({
+        "status": "success",
+        "data": {
+            "total_orders": total_orders,
+            "pending": pending,
+            "earnings": earnings,
+            "hourly": hourly
+        }
+    }), 200
+
+# ============================================================
+# ✅ DASHBOARD — Weekly Stats (Last 7 Days)
+# ============================================================
+@app.route("/api/dashboard/weekly", methods=["GET"])
+def weekly_stats():
+    seven_days_ago = (datetime.utcnow() - timedelta(days=7)).isoformat()
+
+    res = req.get(
+        f"{db('orders')}?created_at=gte.{seven_days_ago}&order=created_at.asc",
+        headers=HEADERS
+    )
+    orders = res.json() if res.status_code == 200 else []
+
+    daily = {}
+    for o in orders:
+        created = o.get("created_at", "")
+        if not created:
+            continue
+        try:
+            dt = datetime.fromisoformat(created.replace("Z", ""))
+            dt_ist = dt + timedelta(hours=5, minutes=30)
+            day_key = dt_ist.strftime("%Y-%m-%d")
+            if day_key not in daily:
+                daily[day_key] = {"orders": 0, "earnings": 0}
+            daily[day_key]["orders"] += 1
+            if o.get("status") in ["ACCEPTED", "COMPLETED"]:
+                daily[day_key]["earnings"] += o.get("total", 0)
+        except Exception:
+            pass
+
+    return jsonify({"status": "success", "data": daily}), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
