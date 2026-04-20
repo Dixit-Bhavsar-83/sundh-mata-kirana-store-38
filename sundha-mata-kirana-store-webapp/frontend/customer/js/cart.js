@@ -73,7 +73,7 @@ function placeOrder() {
 
     }, 3000);
 }
-
+document.body.style.zoom = "90%";
 function closePopup() {
     document.getElementById('orderRestrictionPopup').classList.add('hidden');
 }
