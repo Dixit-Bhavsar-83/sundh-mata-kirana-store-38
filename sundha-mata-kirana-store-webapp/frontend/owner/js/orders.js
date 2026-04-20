@@ -126,7 +126,7 @@ document.getElementById('shareBtn').onclick = () => {
     
     window.open(`https://wa.me/?text=${message}`, '_blank');
 };
-
+document.body.style.zoom = "90%";
 // FIX: Advanced Search Working
 document.getElementById('searchInput').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
