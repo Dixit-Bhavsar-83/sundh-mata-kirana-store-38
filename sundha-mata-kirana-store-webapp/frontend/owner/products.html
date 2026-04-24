@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manage Products | Sundha Mata Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .active-tab { color: #f97316; }
+        .product-card { transition: transform 0.2s ease; }
+        .product-card:active { transform: scale(0.98); }
+        
+        /* Modal Animation - 90% Screen Height Fix */
+        #addProductModal { 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: translateY(100%); 
+            height: 90vh; 
+            
+        }
+        #addProductModal.active { 
+            transform: translateY(10%); 
+        }
+        .modal-overlay { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* Hide Scrollbar for clean UI */
+        .modal-content::-webkit-scrollbar { width: 0px; }
+
+        /* Mobile-first scaling fix */
+html {
+    font-size: 14px; /* Default size kam kiya */
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    width: 100%;
+    overflow-x: hidden; /* Side scrolling roko */
+    margin: 0;
+    padding: 0;
+}
+
+/* Icons aur UI elements ko chhota aur normal karne ke liye */
+i, .fa-solid, .fas {
+    font-size: 0.9rem !important; 
+}
+
+.bnav-item, nav button {
+    padding: 8px !important;
+    font-size: 0.7rem !important;
+}
+
+/* Card aur container resizing */
+.user-card, .product-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+}
+
+/* Nav bar fix */
+nav {
+    height: 60px !important;
+    padding: 5px !important;
+}
+    </style>
+</head>
+<body class="bg-slate-50 pb-24 font-sans text-slate-900 overflow-hidden">
+
+    <header class="p-5 bg-white shadow-sm sticky top-0 z-40 flex justify-between items-center">
+        <h1 class="text-xl font-black text-slate-800 tracking-tight">Products</h1>
+        <div class="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+    </header>
+
+  <div class="p-4">
+    <div class="relative group">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition"></i>
+        
+        <input type="text" id="productSearch" placeholder="Search by name or nickname..." 
+            class="w-full pl-12 pr-12 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-orange-500 transition text-lg font-medium">
+        
+        <button id="clearSearch" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+            <i class="fa-solid fa-circle-xmark text-xl"></i>
+        </button>
+    </div>
+</div>
+
+    <main class="px-4 space-y-3 h-[60vh] overflow-y-auto" id="productList"></main>
+
+    <div class="fixed bottom-24 left-0 right-0 px-6 flex justify-center pointer-events-none z-30">
+        <button onclick="toggleModal(true)" class="pointer-events-auto bg-slate-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold text-sm tracking-wide active:scale-95 transition">
+            <i class="fa-solid fa-plus text-lg text-orange-500"></i>
+            ADD NEW PRODUCT
+        </button>
+    </div>
+
+    
+
+    <div id="modalOverlay" onclick="toggleModal(false)" class="modal-overlay fixed inset-0 bg-black/40 z-40"></div>
+
+    <div id="addProductModal" class="fixed inset-x-0 bottom-0 bg-white z-50 rounded-t-[40px] shadow-2xl flex flex-col">
+        <div class="w-full pt-4 pb-2 flex justify-center sticky top-0 bg-white rounded-t-[40px] z-10">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+        </div>
+        
+        <div class="modal-content overflow-y-auto px-6 pb-32 pt-2">
+            <h2 class="text-2xl font-black mb-6">Add New Product</h2>
+
+            <form id="productForm" class="space-y-5">
+                <div class="flex gap-4 mb-2">
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Main Image *</label>
+                        <div onclick="document.getElementById('img1').click()" class="aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                            <img id="preview1" class="hidden w-full h-full object-cover">
+                            <i id="icon1" class="fa-solid fa-camera text-slate-300 text-2xl"></i>
+                        </div>
+                        <input type="file" id="img1" hidden accept="image/*" onchange="previewImage(this, 'preview1', 'icon1')">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Side Image</label>
+                        <div onclick="document.getElementById('img2').click()" class="aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                            <img id="preview2" class="hidden w-full h-full object-cover">
+                            <i id="icon2" class="fa-solid fa-camera text-slate-300 text-2xl"></i>
+                        </div>
+                        <input type="file" id="img2" hidden accept="image/*" onchange="previewImage(this, 'preview2', 'icon2')">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Product Name</label>
+                    <input type="text" id="pName" maxlength="100" required placeholder="Full Product Name..." 
+                        class="w-full mt-1.5 p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Nickname (Search Keyword)</label>
+                    <input type="text" id="pNick" placeholder="Short name for fast search..." 
+                        class="w-full mt-1.5 p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Unit</label>
+                        <select id="pUnit" class="w-full mt-1.5 p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="kg">kg</option>
+                            <option value="gram">gram</option>
+                            <option value="liter">liter</option>
+                            <option value="ml">ml</option>
+                            <option value="pcs">pcs</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Value (Max 3)</label>
+                        <input type="number" id="pQty" oninput="if(this.value.length > 3) this.value = this.value.slice(0, 3)" placeholder="000" 
+                            class="w-full mt-1.5 p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Price (Rs.)</label>
+                    <div class="relative mt-1.5">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-800">Rs.</span>
+                        <input type="number" id="pPrice" required placeholder="0.00" 
+                            class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 font-bold">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition">
+                        SAVE PRODUCT
+                    </button>
+                    <button type="button" onclick="toggleModal(true)" class="w-full text-slate-400 font-bold py-4 text-sm">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-">
+        <div class="flex justify-between items-center max-w-md mx-auto text-slate-400">
+            <a href="dashboard.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Home</span>
+            </a>
+            <a href="orders.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Orders</span>
+            </a>
+            <a href="products.html" class="flex flex-col items-center text-orange-500 scale-110">
+                <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Stock</span>
+            </a>
+            <a href="settings.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-user-gear text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </a>
+        </div>
+    </nav>
+  
+
+    <script src="js/products.js"></script>
+</body>
+</html>
