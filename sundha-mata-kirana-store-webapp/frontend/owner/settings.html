@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings | Sundha Mata Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        /* ── Sub-screen slide ── */
+        .sub-screen {
+            transform: translateX(100%);
+            transition: transform 0.38s cubic-bezier(.2,.8,.3,1);
+            position: fixed; inset: 0;
+            background: #f8fafc; z-index: 100;
+        }
+        .sub-screen.active { transform: translateX(0); }
+
+        /* ── Password strength ── */
+        .strength-bar { height: 4px; transition: 0.35s; width: 0%; border-radius: 99px; }
+
+        /* ── Glassmorphism ── */
+        .glass {
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.13);
+        }
+
+        /* ── Toggle switch ── */
+        .toggle-wrap { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+        .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+        .toggle-track {
+            position: absolute; inset: 0;
+            background: #334155; border-radius: 99px;
+            transition: 0.3s; cursor: pointer;
+        }
+        .toggle-track::after {
+            content: ''; position: absolute;
+            left: 3px; top: 3px;
+            width: 20px; height: 20px;
+            background: white; border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,.25);
+        }
+        input:checked + .toggle-track { background: #f97316; }
+        input:checked + .toggle-track::after { transform: translateX(22px); }
+
+        /* ── Card tap effect ── */
+        .tap-card { transition: transform .15s, box-shadow .15s; }
+        .tap-card:active { transform: scale(0.97); }
+
+        /* ── Glow badge ── */
+        @keyframes glow {
+            0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,.4); }
+            50%      { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+        }
+        .glow-badge { animation: glow 2.5s ease-in-out infinite; }
+
+        /* ── Scrollbar hide ── */
+        ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
+        /* ── Nav active ── */
+        .nav-active { color: #f97316; }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-900 pb-28 overflow-x-hidden">
+
+<!-- ══════════════ DARK HERO HEADER ══════════════ -->
+<div style="background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #1c1407 100%);" class="px-5 pt-10 pb-8 relative overflow-hidden">
+
+    <!-- Decorative circles -->
+    <div class="absolute top-0 right-0 w-48 h-48 rounded-full opacity-5" style="background:radial-gradient(circle,#f97316,transparent);transform:translate(30%,-30%)"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10" style="background:radial-gradient(circle,#6366f1,transparent);transform:translate(-30%,30%)"></div>
+
+    <!-- Profile row -->
+    <div class="flex items-center gap-4 relative z-10">
+        <div class="relative" onclick="openSub('profileScreen')" style="cursor:pointer">
+            <img id="mainOwnerImg" src="icon.jpg"
+                class="w-20 h-20 rounded-3xl object-cover border-2 border-white/20 shadow-2xl"
+                style="box-shadow: 0 8px 32px rgba(249,115,22,.3)">
+            <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-orange-500 rounded-xl flex items-center justify-center border-2 border-slate-900 shadow-lg">
+                <i class="fa-solid fa-pen text-white" style="font-size:9px"></i>
+            </div>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-white/50 text-[10px] font-black uppercase tracking-widest mb-0.5">Store Owner</p>
+            <h2 id="mainOwnerName" class="text-white text-xl font-black leading-tight truncate">Yes Boss</h2>
+            <p id="mainShopName" class="text-orange-400 text-sm font-bold mt-0.5 truncate">Sundha Mata Kirana</p>
+        </div>
+        <!-- Live badge -->
+        <div class="glass rounded-2xl px-3 py-2 flex items-center gap-2 glow-badge">
+            <span class="w-2 h-2 bg-green-400 rounded-full" style="animation:glow 1.4s ease-in-out infinite"></span>
+            <span class="text-white/80 text-[10px] font-black uppercase tracking-wider">Live</span>
+        </div>
+    </div>
+
+    <!-- Quick stats row -->
+    <div class="grid grid-cols-3 gap-3 mt-6 relative z-10">
+        <div class="glass rounded-2xl p-3 text-center tap-card" onclick="window.location='orders.html'">
+            <div class="text-orange-400 text-xl font-black" id="quickOrders">—</div>
+            <div class="text-white/50 text-[9px] font-bold uppercase mt-0.5">Orders</div>
+        </div>
+        <div class="glass rounded-2xl p-3 text-center tap-card" onclick="window.location='products.html'">
+            <div class="text-blue-400 text-xl font-black" id="quickProducts">—</div>
+            <div class="text-white/50 text-[9px] font-bold uppercase mt-0.5">Products</div>
+        </div>
+        <div class="glass rounded-2xl p-3 text-center">
+            <div class="text-green-400 text-xl font-black">●</div>
+            <div class="text-white/50 text-[9px] font-bold uppercase mt-0.5">Active</div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ MAIN CONTENT ══════════════ -->
+<div class="px-4 pt-5 space-y-5">
+ <!-- ── ACCOUNT CONTROL ── -->
+    <div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3">👤 Account Control</p>
+        <div class="grid grid-cols-2 gap-3">
+
+            <!-- Edit Profile -->
+            <button onclick="openSub('profileScreen')"
+                class="bg-white rounded-2xl p-4 text-left border border-slate-100 shadow-sm tap-card flex flex-col gap-3">
+                <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-user-pen text-orange-500"></i>
+                </div>
+                <div>
+                    <div class="font-black text-sm text-slate-800">Edit Profile</div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Name & photo</div>
+                </div>
+            </button>
+
+            <!-- Security -->
+            <button onclick="openSub('securityScreen')"
+                class="bg-white rounded-2xl p-4 text-left border border-slate-100 shadow-sm tap-card flex flex-col gap-3">
+                <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-lock text-blue-500"></i>
+                </div>
+                <div>
+                    <div class="font-black text-sm text-slate-800">Security</div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Password</div>
+                </div>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ── MANAGEMENT HUB ── -->
+    <div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3">⚙️ Management Hub</p>
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
+
+            <!-- Customer Panel Access -->
+            <div class="p-4 flex items-center gap-4 tap-card" onclick="window.open('../customer/home.html','_blank')">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                     style="background:linear-gradient(135deg,#f97316,#d9dc26)">
+                    <i class="fa-solid fa-users text-white text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-black text-sm text-slate-800">Customer Panel</div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Open customer ordering interface</div>
+                </div>
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-orange-500" style="font-size:11px"></i>
+                </div>
+            </div>
+
+            <!-- Delivery Boy Panel Access -->
+              <div class="p-4 flex items-center gap-4 tap-card" onclick="window.open('../penal/penal.html','_blank')">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                     style="background:linear-gradient(135deg,#f97316,#1fe2de)">
+                    <i class="fa-solid fa-motorcycle text-white text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-black text-sm text-slate-800">Login Data</div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Open Login Data interface</div>
+                </div>
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-orange-500" style="font-size:11px"></i>
+                </div>
+            </div>
+
+
+            <!-- Login Data Logs -->
+            <div class="p-4 flex items-center gap-4 tap-card" onclick="window.open('../delivery-panel/delivery.html','_blank')">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                     style="background:linear-gradient(135deg,#e610de,#26c4dc)">
+                    <i class="fa-solid fa-database text-white text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-black text-sm text-slate-800">Delivery Panel</div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Open  interface</div>
+                </div>
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-orange-500" style="font-size:11px"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+   
+    <!-- ── QUICK LINKS 2-column ── -->
+    <div>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3">🔗 Quick Links</p>
+        <div class="grid grid-cols-2 gap-3">
+
+            <!-- Developers -->
+            <button onclick="openSub('devScreen')"
+                class="bg-slate-900 rounded-2xl p-4 text-left tap-card flex flex-col gap-3">
+                <div class="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-code text-orange-400"></i>
+                </div>
+                <div>
+                    <div class="font-black text-sm text-white">Developers</div>
+                    <div class="text-[10px] text-white/50 font-semibold mt-0.5">Team & contacts</div>
+                </div>
+            </button>
+
+            <!-- Google Review -->
+            <a href="https://search.google.com/local/writereview?placeid=YOUR_GOOGLE_PLACE_ID" target="_blank"
+                class="bg-white rounded-2xl p-4 text-left border border-slate-100 shadow-sm tap-card flex flex-col gap-3 no-underline">
+                <div class="w-11 h-11 bg-yellow-50 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-star text-yellow-400"></i>
+                </div>
+                <div>
+                    <div class="font-black text-sm text-slate-800 flex items-center gap-1">
+                        Review
+                        <span class="text-[8px] font-black bg-orange-500 text-white px-1.5 py-0.5 rounded-full">LIVE</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5">Google Maps</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+<button onclick="confirmReset()" class="w-full mt-6 bg-red-600 text-white p-5 rounded-3xl font-black shadow-lg active:scale-95 transition">
+    <i class="fa-solid fa-trash mr-2"></i> FRESH START (Delete All Data)
+</button>
+    <!-- App version -->
+    <div class="text-center py-2">
+        <p class="text-[10px] text-slate-300 font-semibold">Sundha Mata Kirana Store v2.0 · Made with ❤️ in India</p>
+    </div>
+
+</div>
+
+<!-- ══════════════ SUB-SCREENS ══════════════ -->
+
+<!-- Edit Profile -->
+<div id="profileScreen" class="sub-screen overflow-y-auto">
+    <header class="p-5 bg-white flex items-center justify-between sticky top-0 shadow-sm z-10 border-b border-slate-50">
+        <button onclick="closeSub('profileScreen')"
+            class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center tap-card">
+            <i class="fa-solid fa-chevron-left text-slate-600"></i>
+        </button>
+        <h2 class="font-black text-lg">Edit Profile</h2>
+        <button onclick="saveProfile()" class="text-orange-500 font-black text-sm uppercase tracking-wide tap-card">Save</button>
+    </header>
+    <div class="p-6 space-y-6">
+        <div class="flex flex-col items-center">
+            <div class="relative tap-card" onclick="document.getElementById('profileInput').click()" style="cursor:pointer">
+                <img id="editImgPreview" src="https://via.placeholder.com/150"
+                    class="w-28 h-28 rounded-3xl object-cover border-4 border-white shadow-2xl">
+                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
+                    <i class="fa-solid fa-camera text-white text-xs"></i>
+                </div>
+            </div>
+            <input type="file" id="profileInput" hidden accept="image/*" onchange="previewProfile(this)">
+            <p class="text-[10px] text-slate-400 font-semibold mt-4">Tap photo to change</p>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">Owner Name</label>
+                <input type="text" id="editName" value="Yes boss"
+                    class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-400 transition shadow-sm font-bold text-slate-800">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">Shop Name</label>
+                <input type="text" id="editShop" placeholder="Sundha Mata Kirana Store"
+                    class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-400 transition shadow-sm font-bold text-slate-800">
+            </div>
+        </div>
+        <button onclick="saveProfile()"
+            class="w-full p-4 text-white font-black rounded-2xl tap-card shadow-lg"
+            style="background:linear-gradient(135deg,#f97316,#dc2626)">
+            Save Profile
+        </button>
+    </div>
+</div>
+
+<!-- Security -->
+<div id="securityScreen" class="sub-screen overflow-y-auto">
+    <header class="p-5 bg-white flex items-center justify-between sticky top-0 shadow-sm z-10 border-b border-slate-50">
+        <button onclick="closeSub('securityScreen')"
+            class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center tap-card">
+            <i class="fa-solid fa-chevron-left text-slate-600"></i>
+        </button>
+        <h2 class="font-black text-lg">Security</h2>
+        <div class="w-10"></div>
+    </header>
+    <div class="p-6 space-y-5">
+        <div class="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+            <p class="text-xs text-orange-700 leading-relaxed font-bold">
+                <i class="fa-solid fa-shield-halved mr-1"></i>
+                Use a strong password with uppercase, numbers & symbols.
+            </p>
+        </div>
+        <div>
+            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">New Password</label>
+            <input type="password" id="newPass" oninput="checkPassStrength(this.value)"
+                class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-400 transition shadow-sm font-bold">
+            <div class="mt-3">
+                <div class="w-full bg-slate-100 rounded-full overflow-hidden h-1.5">
+                    <div id="strengthBar" class="strength-bar bg-red-500"></div>
+                </div>
+                <p id="strengthText" class="text-[10px] font-black mt-2 text-slate-400 uppercase">Too Weak</p>
+            </div>
+        </div>
+        <button class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-xl tap-card">
+            UPDATE PASSWORD
+        </button>
+    </div>
+</div>
+
+<!-- Developers -->
+<div id="devScreen" class="sub-screen overflow-y-auto">
+    <header class="p-5 bg-white flex items-center justify-between sticky top-0 shadow-sm z-10 border-b border-slate-50">
+        <button onclick="closeSub('devScreen')"
+            class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center tap-card">
+            <i class="fa-solid fa-chevron-left text-slate-600"></i>
+        </button>
+        <h2 class="font-black text-lg">The Creators</h2>
+        <div class="w-10"></div>
+    </header>
+    <div class="p-5 space-y-4 pb-20">
+
+        <!-- Manish Vyas -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center tap-card">
+            <img src="developers/manish sir.jpeg"
+                class="w-22 h-22 rounded-3xl shadow-xl mb-4 border-4 border-white object-cover"
+                style="width:88px;height:88px">
+            <h3 class="font-black text-lg">Mr. Manish Vyas</h3>
+            <span class="text-[10px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase mt-1">Co-Founder</span>
+            <p class="text-xs text-slate-400 font-semibold mt-3 px-2 leading-relaxed">Mathematics and computing expert making the world safer with maths.</p>
+            <div class="flex gap-3 mt-4">
+                <a href="https://667965582815e.site123.me/" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-green-600 tap-card border border-slate-100"><i class="fa-solid fa-school"></i></a>
+                <a href="https://www.instagram.com/manishvyas71?igsh=cnM3NjY5c3ZodHF5" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-pink-500 tap-card border border-slate-100"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.snapchat.com/add/manishvyas9611?share_id=9OOFD6zEhBw&locale=en-US" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center tap-card border border-slate-100"><i class="fab fa-snapchat text-xl" style="color:#f7df00"></i></a>
+                <a href="https://www.facebook.com/share/17c39KZeQg/" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 tap-card border border-slate-100"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
+
+        <!-- Rachana Vyas -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center tap-card">
+            <img src="developers/rachana ma'am.jpeg"
+                class="w-22 h-22 rounded-3xl shadow-xl mb-4 border-4 border-white object-cover"
+                style="width:88px;height:88px">
+            <h3 class="font-black text-lg">Mrs. Rachana Vyas</h3>
+            <span class="text-[10px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase mt-1">Co-Founder</span>
+            <p class="text-xs text-slate-400 font-semibold mt-3 px-2 leading-relaxed">Cardiologist & physiotherapist — healthcare meets innovation.</p>
+            <div class="flex gap-3 mt-4">
+                <a href="https://667965582815e.site123.me/" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-green-600 tap-card border border-slate-100"><i class="fa-solid fa-school"></i></a>
+                <a href="https://www.instagram.com/hi_sisters83?igsh=cWZxMTNlOHpicWtm" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-pink-500 tap-card border border-slate-100"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.snapchat.com/add/rachanavyas2178?share_id=2JZeLuml0rU&locale=en-US" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center tap-card border border-slate-100"><i class="fab fa-snapchat text-xl" style="color:#f7df00"></i></a>
+                <a href="https://www.facebook.com/share/1Lj7XLCauV/" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 tap-card border border-slate-100"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
+
+        <!-- Dixit Bhavsar -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center tap-card">
+            <img src="developers/dixit.jpeg"
+                class="w-22 h-22 rounded-3xl shadow-xl mb-4 border-4 border-white object-cover"
+                style="width:88px;height:88px">
+            <h3 class="font-black text-lg">Dixit Bhavsar</h3>
+            <span class="text-[10px] bg-orange-100 text-orange-600 px-3 py-1 rounded-full font-black uppercase mt-1">Visionary Founder</span>
+            <p class="text-xs text-slate-400 font-semibold mt-3 px-2 leading-relaxed">Tech expert making the world safer with every line of code.</p>
+            <div class="flex gap-3 mt-4">
+                <a href="https://whatsapp.com/channel/0029VauxFCbIXnlkn9kLCQ1b" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-green-500 tap-card border border-slate-100"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/dixitbhavsar83_official?igsh=ZXlnZjVyMnJrZnA3" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-pink-500 tap-card border border-slate-100"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.snapchat.com/add/dixit_bhavsar25?share_id=hKYz6r4Lv9I&locale=en-US" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center tap-card border border-slate-100"><i class="fab fa-snapchat text-xl" style="color:#f7df00"></i></a>
+                <a href="https://www.facebook.com/share/18o7h6pTrX/" class="w-11 h-11 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 tap-card border border-slate-100"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-40"
+     style="box-shadow: 0 -4px 20px rgba(0,0,0,.07)">
+    <div class="flex justify-between items-center max-w-md mx-auto text-slate-400">
+        <a href="dashboard.html" class="flex flex-col items-center tap-card">
+            <i class="fa-solid fa-house-chimney text-xl"></i>
+            <span class="text-[10px] font-bold mt-1">Home</span>
+        </a>
+        <a href="orders.html" class="flex flex-col items-center tap-card">
+            <i class="fa-solid fa-clipboard-list text-xl"></i>
+            <span class="text-[10px] font-bold mt-1">Orders</span>
+        </a>
+        <a href="products.html" class="flex flex-col items-center tap-card">
+            <i class="fa-solid fa-boxes-stacked text-xl"></i>
+            <span class="text-[10px] font-bold mt-1">Stock</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center nav-active">
+            <i class="fa-solid fa-user-gear text-xl"></i>
+            <span class="text-[10px] font-bold mt-1">Profile</span>
+        </a>
+    </div>
+</nav>
+
+<script src="js/settings.js"></script>
+<script>
+// ── Extra UI logic (not in settings.js) ──────────────────
+
+// Load quick stats in header
+async function loadQuickStats() {
+    try {
+        // Orders count
+        const oRes = await fetch('/api/orders');
+        const oJson = await oRes.json();
+        if (oJson.status === 'success') {
+            document.getElementById('quickOrders').textContent = oJson.data.length;
+        }
+    } catch(e) {}
+    try {
+        // Products count
+        const pRes = await fetch('/api/products');
+        const pJson = await pRes.json();
+        if (pJson.status === 'success') {
+            document.getElementById('quickProducts').textContent = pJson.data.length;
+        }
+    } catch(e) {}
+}
+
+// Login log display
+function updateLoginLog() {
+    const lastLogin = localStorage.getItem('lastLoginTime');
+    const el = document.getElementById('loginLogText');
+    if (lastLogin) {
+        const d = new Date(parseInt(lastLogin) + 19800000);
+        el.textContent = `Last: ${d.getUTCDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]} ${d.getUTCFullYear()}, ${d.getUTCHours()%12||12}:${String(d.getUTCMinutes()).padStart(2,'0')} ${d.getUTCHours()>=12?'PM':'AM'}`;
+    } else {
+        el.textContent = 'Session active ✓';
+    }
+    // Save current login time if not set
+    if (!lastLogin) {
+        localStorage.setItem('lastLoginTime', Date.now().toString());
+    }
+}
+
+// Notification toggle
+function toggleNotif(checkbox) {
+    localStorage.setItem('notifEnabled', checkbox.checked ? '1' : '0');
+    if (checkbox.checked && 'Notification' in window) {
+        Notification.requestPermission();
+    }
+}
+
+// Init notification toggle state
+function initNotifToggle() {
+    const saved = localStorage.getItem('notifEnabled');
+    if (saved === '1') {
+        document.getElementById('notifToggle').checked = true;
+    }
+}
+
+// Boot
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuickStats();
+    updateLoginLog();
+    initNotifToggle();
+});
+</script>
+</body>
+</html>

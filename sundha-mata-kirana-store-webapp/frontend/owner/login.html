@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Owner Login | Sundha Mata Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-login { animation: fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+
+        /* Mobile-first scaling fix */
+html {
+    font-size: 14px; /* Default size kam kiya */
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    width: 100%;
+    overflow-x: hidden; /* Side scrolling roko */
+    margin: 0;
+    padding: 0;
+}
+
+/* Icons aur UI elements ko chhota aur normal karne ke liye */
+i, .fa-solid, .fas {
+    font-size: 0.9rem !important; 
+}
+
+.bnav-item, nav button {
+    padding: 8px !important;
+    font-size: 0.7rem !important;
+}
+
+/* Card aur container resizing */
+.user-card, .product-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+}
+
+/* Nav bar fix */
+nav {
+    height: 60px !important;
+    padding: 5px !important;
+}
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center h-screen px-6 overflow-hidden">
+
+    <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-50"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-blue-200 rounded-full blur-3xl opacity-50"></div>
+
+    <div class="w-full max-w-sm glass p-8 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white animate-login z-10">
+        <div class="text-center mb-10">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight italic">Shundh Mata Kirana
+                 <span class="text-orange-600">STORE</span></h1>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Owner Control Panel</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            <div class="relative">
+                <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="username" required placeholder="Username"
+                    class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none transition font-bold text-slate-700">
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="password" id="password" required placeholder="Password"
+                    class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none transition font-bold text-slate-700">
+            </div>
+            
+            <button type="submit" id="loginBtn"
+                class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl shadow-slate-200 hover:bg-black transition active:scale-95 flex items-center justify-center gap-2 mt-4">
+                LOGIN 
+            </button>
+            
+        </form>
+        
+        <p id="errorMessage" class="text-red-500 text-[10px] font-black mt-6 text-center hidden uppercase tracking-wider">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Invalid Access Credentials!
+        </p>
+    </div>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>
