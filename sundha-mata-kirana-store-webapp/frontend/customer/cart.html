@@ -70,15 +70,29 @@
 
         <nav class="bg-white/95 backdrop-blur-xl border-t border-slate-100 px-10 py-4">
             <div class="flex justify-between items-center max-w-md mx-auto">
+                <!--home navbar-->
                 <button onclick="window.location.href='home.html'" class="flex flex-col items-center gap-1 text-slate-300">
                     <i class="fas fa-home text-xl"></i>
                     <span class="text-[9px] font-black">HOME</span>
                 </button>
+                <!--cart navbar-->
                 <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-orange-500 relative">
                     <i class="fas fa-shopping-bag text-xl"></i>
                     <span id="cartBadge" class="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center font-bold">0</span>
                     <span class="text-[9px] font-black">CART</span>
                 </button>
+                <!--update navabar-->
+                   <button onclick="window.location.href='update.html'" class="flex flex-col items-center gap-1 text-slate-300">
+                     <i class="fa-solid fa-satellite-dish"></i>
+                    <span id="navActiveDot" class="nav-dot" -top-1 -right-1 bg-orange-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center font-bold">0</span>
+                    <span class="text-[9px] font-black">UPDATE</span>
+                </button>
+                   <a href="settings.html" class="flex flex-col items-center text-slate-300">
+                <i class="fa-solid fa-user-gear text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </a>
+
+
             </div>
         </nav>
     </div>
