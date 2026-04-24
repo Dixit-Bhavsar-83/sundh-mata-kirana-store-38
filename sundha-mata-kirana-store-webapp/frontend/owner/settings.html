@@ -59,24 +59,20 @@
                 <p id="mainShopName" class="text-orange-500 font-bold mt-1">My Store</p>
             </div>
         </div>
-
-        <div class="grid grid-cols-3 gap-4">
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Stock</p>
-                <h4 class="font-black text-slate-800">1.2k</h4>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Sales</p>
-                <h4 class="font-black text-slate-800">850</h4>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Rating</p>
-                <h4 class="font-black text-orange-600">4.9</h4>
-            </div>
-        </div>
     </header>
 
     <main class="p-6 space-y-6">
+
+          <button onclick="openSub('devScreen')" class="w-full bg-slate-900 p-6 rounded-[32px] shadow-xl text-white flex items-center justify-between active:scale-95 transition">
+            <div class="flex items-center gap-4 text-left">
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-orange-500"><i class="fa-solid fa-code"></i></div>
+                <div>
+                    <p class="font-black text-sm">Developers Team</p>
+                    <p class="text-[10px] opacity-60 font-bold">Showcase & Contact</p>
+                </div>
+            </div>
+        
+        </button>
 
 
 <!-- ⭐ GOOGLE REVIEW (TOP + GLOW) -->
@@ -162,16 +158,7 @@
 
     </div>
 </div>
-        <button onclick="openSub('devScreen')" class="w-full bg-slate-900 p-6 rounded-[32px] shadow-xl text-white flex items-center justify-between active:scale-95 transition">
-            <div class="flex items-center gap-4 text-left">
-                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-orange-500"><i class="fa-solid fa-code"></i></div>
-                <div>
-                    <p class="font-black text-sm">Developers Team</p>
-                    <p class="text-[10px] opacity-60 font-bold">Showcase & Contact</p>
-                </div>
-            </div>
-            <i class="fa-solid fa-arrow-right-long text-orange-500"></i>
-        </button>
+   
     </main>
 
     <div id="profileScreen" class="sub-screen overflow-y-auto">
