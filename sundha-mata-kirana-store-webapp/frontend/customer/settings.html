@@ -59,24 +59,20 @@
                 <p id="mainShopName" class="text-orange-500 font-bold mt-1">My Store</p>
             </div>
         </div>
-
-        <div class="grid grid-cols-3 gap-4">
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Stock</p>
-                <h4 class="font-black text-slate-800">1.2k</h4>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Sales</p>
-                <h4 class="font-black text-slate-800">850</h4>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-3xl text-center border border-slate-100">
-                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">Rating</p>
-                <h4 class="font-black text-orange-600">4.9</h4>
-            </div>
-        </div>
     </header>
 
     <main class="p-6 space-y-6">
+
+          <button onclick="openSub('devScreen')" class="w-full bg-slate-900 p-6 rounded-[32px] shadow-xl text-white flex items-center justify-between active:scale-95 transition">
+            <div class="flex items-center gap-4 text-left">
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-orange-500"><i class="fa-solid fa-code"></i></div>
+                <div>
+                    <p class="font-black text-sm">Developers Team</p>
+                    <p class="text-[10px] opacity-60 font-bold">Showcase & Contact</p>
+                </div>
+            </div>
+        
+        </button>
 
 
 <!-- ⭐ GOOGLE REVIEW (TOP + GLOW) -->
@@ -162,15 +158,7 @@
 
     </div>
 </div>
-        <button onclick="openSub('devScreen')" class="w-full bg-slate-900 p-6 rounded-[32px] shadow-xl text-white flex items-center justify-between active:scale-95 transition">
-            <div class="flex items-center gap-4 text-left">
-                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-orange-500"><i class="fa-solid fa-code"></i></div>
-                <div>
-                    <p class="font-black text-sm">Developers Team</p>
-                    <p class="text-[10px] opacity-60 font-bold">Showcase & Contact</p>
-                </div>
-            </div>
-        </button>
+   
     </main>
 
     <div id="profileScreen" class="sub-screen overflow-y-auto">
@@ -233,7 +221,7 @@
             <h2 class="font-black text-lg">The Creators</h2>
             <div class="w-10"></div>
         </header>
-        <div class="p-6 space-y-6 pb-20">
+          <div class="p-6 space-y-6 pb-20">
 
             <!--MANISH VYAS-->
             <div class="bg-white p-6 rounded-[40px] border border-slate-100 shadow-sm flex flex-col items-center text-center">
@@ -287,17 +275,17 @@
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-">
         <div class="flex justify-between items-center max-w-md mx-auto text-slate-400">
-            <a href="home.html" class="flex flex-col items-center">
-                <i class="fa-solid fa-house-chimney"></i>
+            <a href="dashboard.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
                 <span class="text-[10px] font-bold mt-1">Home</span>
             </a>
-            <a href="cart.html" class="flex flex-col items-center">
-               <i class="fas fa-shopping-bag text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">CART</span>
+            <a href="orders.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Orders</span>
             </a>
-            <a href="update.html" class="flex flex-col items-center">
-             <i id="statusIcon" class="fa-solid fa-satellite-dish text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">UPDATE</span>
+            <a href="products.html" class="flex flex-col items-center">
+                <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Stock</span>
             </a>
             <a href="settings.html" class="flex flex-col items-center text-orange-500 scale-110">
                 <i class="fa-solid fa-user-gear text-xl"></i>
@@ -306,8 +294,6 @@
         </div>
     </nav>
 
-    
-
-    <script src="js/setting.js"></script>
+    <script src="js/settings.js"></script>
 </body>
 </html>
