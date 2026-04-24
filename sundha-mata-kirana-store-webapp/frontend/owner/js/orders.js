@@ -17,7 +17,6 @@ async function loadOrders() {
 
         const fresh = json.data || [];
 
-        // New order toast
         if (allOrders.length > 0 && fresh.length > allOrders.length) {
             const n = fresh.length - allOrders.length;
             showToast(`${n} new order${n > 1 ? 's' : ''} received! 🔔`);
@@ -34,8 +33,8 @@ async function loadOrders() {
 function updateHeaderCounts(orders) {
     const pending  = orders.filter(o => o.status === 'PENDING').length;
     const accepted = orders.filter(o => o.status === 'ACCEPTED').length;
-    setEl('activeCount',  pending);
-    setEl('pendingCount', pending);
+    setEl('activeCount',   pending);
+    setEl('pendingCount',  pending);
     setEl('acceptedCount', accepted);
     const d = document.getElementById('detActiveCount');
     if (d) d.textContent = pending;
@@ -144,14 +143,12 @@ function openDetails(order) {
     setEl('detAddr',      address);
     setEl('detTotal',     `₹${total.toLocaleString('en-IN')}`);
 
-    // Profession field
     const profEl = document.getElementById('detProfession');
     if (profEl) {
-        profEl.textContent  = profession || '—';
+        profEl.textContent = profession || '—';
         profEl.closest('.profession-row')?.classList.toggle('hidden', !profession);
     }
 
-    // Items
     const container = document.getElementById('itemsContainer');
     container.innerHTML = (order.items || []).length === 0
         ? '<p class="text-slate-400 text-sm text-center py-4">No items info</p>'
@@ -169,7 +166,6 @@ function openDetails(order) {
                 <p class="font-black text-slate-800 text-sm">₹${((item.qty || 1) * (item.price || 0)).toLocaleString('en-IN')}</p>
             </div>`).join('');
 
-    // Accept button
     const acceptBtn = document.getElementById('acceptBtn');
     if (order.status === 'ACCEPTED') {
         acceptBtn.textContent = '✓ ORDER ACCEPTED';
@@ -181,7 +177,6 @@ function openDetails(order) {
         acceptBtn.disabled    = false;
     }
 
-    // Call button
     document.getElementById('callBtn').onclick = () => {
         if (phone) window.location.href = `tel:${phone}`;
     };
@@ -193,13 +188,11 @@ function closeDetails() {
     document.getElementById('detailOverlay').classList.add('hidden');
 }
 
-// Accept
 document.getElementById('acceptBtn').onclick = async () => {
     if (!activeOrder || activeOrder.status !== 'PENDING') return;
     await acceptOrder(activeOrder.id);
-    // Update local copy
     activeOrder.status = 'ACCEPTED';
-    openDetails(activeOrder); // Refresh overlay
+    openDetails(activeOrder);
 };
 
 async function acceptOrder(orderId) {
@@ -220,7 +213,6 @@ async function acceptOrder(orderId) {
     }
 }
 
-// WhatsApp Share — ALL customer details
 document.getElementById('shareBtn').onclick = () => {
     if (!activeOrder) return;
 
@@ -254,7 +246,6 @@ document.getElementById('shareBtn').onclick = () => {
     window.open(`https://wa.me/?text=${msg}`, '_blank');
 };
 
-// Search
 document.getElementById('searchInput').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     if (!term) { renderAllSections(allOrders); return; }
@@ -267,7 +258,6 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
     renderAllSections(filtered);
 });
 
-// Toast
 function showToast(msg) {
     const toast = document.getElementById('newOrderToast');
     const text  = document.getElementById('toastText');
@@ -285,14 +275,37 @@ function showToast(msg) {
     }, 3000);
 }
 
-// Helpers
+// ─────────────────────────────────────────────────────────
+// ✅ FIXED: formatDateTime — UTC → IST (India +5:30)
+// Supabase stores timestamps in UTC.
+// new Date(iso) browser se galat local time deta tha.
+// Solution: manually add 5hr 30min to UTC milliseconds.
+// ─────────────────────────────────────────────────────────
 function formatDateTime(iso) {
     if (!iso) return '—';
-    const d    = new Date(iso);
-    const date = d.toLocaleDateString('en-IN',  { day: 'numeric', month: 'short', year: 'numeric' });
-    const time = d.toLocaleTimeString('en-IN',  { hour: '2-digit', minute: '2-digit', hour12: true });
-    return `${date}, ${time}`;
+
+    // Parse the ISO string as UTC
+    const utcMs = Date.parse(iso);
+    if (isNaN(utcMs)) return '—';
+
+    // Add IST offset: +5 hours 30 minutes = 19800 seconds = 19800000 ms
+    const istMs = utcMs + (5 * 60 + 30) * 60 * 1000;
+    const d     = new Date(istMs);
+
+    // Format using UTC getters (because we already shifted to IST manually)
+    const day   = d.getUTCDate();
+    const month = ['Jan','Feb','Mar','Apr','May','Jun',
+                   'Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+    const year  = d.getUTCFullYear();
+
+    let   hours = d.getUTCHours();
+    const mins  = String(d.getUTCMinutes()).padStart(2, '0');
+    const ampm  = hours >= 12 ? 'PM' : 'AM';
+    hours       = hours % 12 || 12;
+
+    return `${day} ${month} ${year}, ${hours}:${mins} ${ampm}`;
 }
+
 function shortId(id)    { return (id || '').slice(-6).toUpperCase(); }
 function setEl(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
 function escHtml(str)   { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
