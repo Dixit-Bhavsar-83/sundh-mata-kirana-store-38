@@ -32,7 +32,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
                 password: password
             })
         });
-    document.body.style.zoom = "90%";
+
         const data = await res.json();
 
         if (res.ok && data.status === "success") {
