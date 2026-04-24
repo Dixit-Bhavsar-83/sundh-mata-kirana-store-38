@@ -5,10 +5,13 @@ from routes.user_routes import user_bp
 import os
 import uuid
 import requests as req
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_123"
+
+def get_ist_now():
+    return datetime.utcnow() + timedelta(hours=5, minutes=30)
 
 CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
 
@@ -17,9 +20,6 @@ FRONTEND_FOLDER = os.path.join(BASE_DIR, "..", "frontend")
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
-print("SUPABASE_URL:", SUPABASE_URL)
-print("SUPABASE_KEY:", SUPABASE_KEY[:20] if SUPABASE_KEY else "MISSING!")
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -32,6 +32,7 @@ def db(table):
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
+
 
 @app.route("/")
 def serve_index():
@@ -152,6 +153,20 @@ def get_orders():
     orders = res.json()
     return jsonify({"status": "success", "data": orders}), 200
 
+@app.route("/api/orders/<order_id>", methods=["GET"])
+def get_single_order(order_id):
+    res = req.get(
+        f"{db('orders')}?id=eq.{order_id}&limit=1",
+        headers=HEADERS
+    )
+    if res.status_code != 200:
+        return jsonify({"status": "error", "message": res.text}), 500
+    data = res.json()
+    if not data:
+        return jsonify({"status": "error", "message": "Order not found"}), 404
+    return jsonify({"status": "success", "data": data[0]}), 200
+ 
+ 
 # ============================================================
 # ✅ ORDERS — Update Status (PENDING → ACCEPTED)
 # ============================================================
@@ -159,13 +174,18 @@ def get_orders():
 def update_order_status(order_id):
     data = request.json
     new_status = data.get("status", "ACCEPTED")
+    boy_id = data.get("delivery_boy_id") # New field
+
+    update_payload = {"status": new_status}
+    if boy_id:
+        update_payload["delivery_boy_id"] = boy_id
 
     res = req.patch(
         f"{db('orders')}?id=eq.{order_id}",
-        json={"status": new_status},
+        json=update_payload,
         headers=HEADERS
     )
-    print(f"STATUS UPDATE [{order_id}] → {new_status} :", res.status_code)
+    print(f"STATUS UPDATE [{order_id}] → {new_status} (Boy: {boy_id}):", res.status_code)
     return jsonify({"status": "success"}), 200
 
 # ============================================================
@@ -188,8 +208,11 @@ def dashboard_stats():
     total_orders = len(orders)
     pending = sum(1 for o in orders if o.get("status") == "PENDING")
     # Earnings = only accepted orders
-    earnings = sum(o.get("total", 0) for o in orders if o.get("status") == "ACCEPTED")
-
+    earnings = sum(
+    o.get("total", 0)
+    for o in orders
+    if o.get("status") in ["ACCEPTED", "DELIVERED", "COMPLETED"]
+)
     # Hourly breakdown for live chart
     hourly = {}
     for o in orders:
@@ -218,6 +241,8 @@ def dashboard_stats():
         }
     }), 200
 
+    
+
 # ============================================================
 # ✅ DASHBOARD — Weekly Stats (Last 7 Days)
 # ============================================================
@@ -243,13 +268,49 @@ def weekly_stats():
             if day_key not in daily:
                 daily[day_key] = {"orders": 0, "earnings": 0}
             daily[day_key]["orders"] += 1
-            if o.get("status") in ["ACCEPTED", "COMPLETED"]:
+            if o.get("status") in ["ACCEPTED", "COMPLETED", "DELIVERED"]:
                 daily[day_key]["earnings"] += o.get("total", 0)
         except Exception:
             pass
 
     return jsonify({"status": "success", "data": daily}), 200
 
+
+# ✅ DELIVERY ROUTES
+# ════════════════════════════════════════════════════════════
+ 
+@app.route("/api/delivery/live", methods=["GET"])
+def delivery_live_orders():
+    # Aaj ki midnight (IST)
+    ist_today_start = get_ist_now().replace(hour=0, minute=0, second=0, microsecond=0)
+    utc_today_start = (ist_today_start - timedelta(hours=5, minutes=30)).isoformat()
+    
+    # Logic: Status PENDING ho OR Status ACCEPTED ho but delivery_boy_id khali (null) ho
+    # Supabase filter:
+    res = req.get(
+        f"{db('orders')}?created_at=gte.{utc_today_start}&or=(status.eq.PENDING,and(status.eq.ACCEPTED,delivery_boy_id.is.null))&order=created_at.desc",
+        headers=HEADERS
+    )
+    if res.status_code != 200:
+        return jsonify({"status": "error", "message": res.text}), 500
+    return jsonify({"status": "success", "data": res.json()}), 200
+
+@app.route("/api/delivery/mine", methods=["GET"])
+def delivery_my_orders():
+    boy_id = request.args.get("boy_id", "")
+    if not boy_id:
+        return jsonify({"status": "error", "message": "boy_id required"}), 400
+    
+    # Simple query: sirf boy_id match karo, baki filter hata do test karne ke liye
+    url = f"{db('orders')}?delivery_boy_id=eq.{boy_id}&order=created_at.desc"
+    
+    res = req.get(url, headers=HEADERS)
+    
+    # Agar error aaye, toh crash mat hone do
+    if res.status_code != 200:
+        return jsonify({"status": "error", "message": "Database error", "debug": res.text}), 200
+        
+    return jsonify({"status": "success", "data": res.json()}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
