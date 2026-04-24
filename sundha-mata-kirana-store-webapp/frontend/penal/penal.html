@@ -17,7 +17,16 @@
             scrollbar-width: none;
         }
         .data-section::-webkit-scrollbar { display: none; }
-
+        /* Card aur premium feel ke liye */
+.user-card {
+    background: #121212;
+    border: 1px solid #1f1f1f;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.user-card:hover {
+    border-color: #f97316; /* Orange hover effect */
+    transform: translateY(-2px);
+}
         .user-card {
             background: #161616;
             border: 1px solid #262626;
@@ -75,6 +84,7 @@
 
         <footer class="glass-nav fixed bottom-0 left-0 right-0 p-6 flex justify-around items-center">
             <button class="text-white flex flex-col items-center gap-1"><i class="fas fa-th-large"></i><span class="text-[9px] font-bold uppercase tracking-tighter">Panel</span></button>
+            
             <button class="text-zinc-600 flex flex-col items-center gap-1"><i class="fas fa-history"></i><span class="text-[9px] font-bold uppercase tracking-tighter">Logs</span></button>
             <button onclick="location.reload()" class="text-zinc-600 flex flex-col items-center gap-1"><i class="fas fa-power-off"></i><span class="text-[9px] font-bold uppercase tracking-tighter">Exit</span></button>
         </footer>
