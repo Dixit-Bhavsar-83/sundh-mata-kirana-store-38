@@ -75,6 +75,21 @@
             </p>
         </div>
 
+        
+        <!-- PRICE (NO BOX ✅) -->
+        <h4 id="detailPrice" class="text-2xl font-black text-slate-900 mb-3"></h4>
+<div class="flex gap-3">
+        <button onclick="addToCartFromDetail()" 
+            class="flex-1 bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-500/30 active:scale-95 transition-all">
+            Add to Cart
+        </button>
+
+        <!--<button onclick="buyNow()" 
+            class="flex-1 bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-500/30 active:scale-95 transition-all">
+            Buy Now
+        </button>-->
+    </div>
+
     </div>
 
     
@@ -92,14 +107,14 @@
         <!-- BUTTONS -->
        <div class="flex gap-3">
     <button onclick="addToCartFromDetail()" 
-        class="flex-1 border border-orange-500 text-orange-500 py-3 rounded-2xl font-bold">
+        class="flex-1 bg-orange-500 text-white py-3 rounded-2xl  font-bold">
         Add to Cart
     </button>
 
-    <button onclick="buyNow()" 
+    <!--<button onclick="buyNow()" 
         class="flex-1 bg-orange-500 text-white py-3 rounded-2xl font-bold">
         Buy Now
-    </button>
+    </button>-->
 </div>
 
     </div>
@@ -123,14 +138,33 @@
     <p class="text-sm">Your order has been placed successfully</p>
 </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between px-10">
-        <button onclick="showScreen('home')" class="text-orange-500"><i class="fas fa-home text-xl"></i></button>
-        <button onclick="window.location.href='cart.html'" class="text-slate-300 relative">
-            <i class="fas fa-shopping-bag text-xl"></i>
-           
-            <span id="cartBadge" class="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center">0</span>
+
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-10 py-3 z-50">
+    <div class="flex justify-between items-center max-w-md mx-auto">
+        
+        <button onclick="window.location.href='home.html'" class="flex flex-col items-center gap-1 text-orange-500 relative ">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[9px] font-black tracking-wider">HOME</span>
         </button>
-    </nav>
+
+        <button onclick="window.location.href='cart.html'" class="flex flex-col items-center gap-1 text-slate-300 relative">
+            <i class="fas fa-shopping-bag text-lg"></i>
+            <span id="cartBadge" class="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] w-4 h-4 rounded-full hidden flex items-center justify-center font-bold">0</span>
+            <span class="text-[9px] font-black tracking-wider">CART</span>
+        </button>
+
+        <button onclick="window.location.href='update.html'" class="flex flex-col items-center gap-1 text-slate-300 relative ">
+            <i id="statusIcon" class="fa-solid fa-satellite-dish text-lg"></i>
+            <span id="navActiveDot" class="absolute -top-1 -right-1 bg-yellow-400 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold animate-pulse">!</span>
+            <span class="text-[9px] font-black tracking-wider">UPDATE</span>
+        </button>
+           <a href="settings.html" class="flex flex-col items-center text-slate-300">
+                <i class="fa-solid fa-user-gear text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </a>
+        
+    </div>
+</nav>
     
 
     <script src="js/home.js"></script>
