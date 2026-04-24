@@ -117,23 +117,33 @@ function sharedLineOptions(customCallbacks) {
         }
     };
 }
-
 // ── LIVE SALES CHART (Today, hourly) ──────────────────────
 function updateSalesChart(hourlyData) {
-    const canvas     = document.getElementById('salesChart');
+    const canvas = document.getElementById('salesChart');
     const emptyState = document.getElementById('chartEmptyState');
     if (!canvas) return;
 
-    const currentHour = new Date().getHours();
-    const startHour   = 6;
+    const startHour = 6;
+    const endHour = 22; 
     const labels = [], earningsArr = [], ordersArr = [];
 
-    for (let h = startHour; h <= Math.max(currentHour, startHour); h++) {
+    // Calculate Max values for scaling
+    let maxEarnings = 1000; 
+    let maxOrders = 1;
+
+    for (let h = startHour; h <= endHour; h++) {
         const slot = hourlyData[String(h)] || hourlyData[h] || { earnings: 0, orders: 0 };
         labels.push(h < 12 ? `${h}AM` : h === 12 ? '12PM' : `${h - 12}PM`);
+        
         earningsArr.push(slot.earnings || 0);
-        ordersArr.push((slot.orders   || 0) * 60); // scale for dual-axis look
+        ordersArr.push(slot.orders || 0);
+        
+        if (slot.earnings > maxEarnings) maxEarnings = slot.earnings;
+        if (slot.orders > maxOrders) maxOrders = slot.orders;
     }
+
+    // Normalization factor: Orders ko Earnings ke scale par laane ke liye
+    const scaleFactor = maxEarnings / maxOrders;
 
     const hasData = earningsArr.some(v => v > 0) || ordersArr.some(v => v > 0);
 
@@ -146,13 +156,13 @@ function updateSalesChart(hourlyData) {
 
     const ctx = canvas.getContext('2d');
 
+    // Orders ko Earnings ke level pe scale karna (visual sirf)
+    const scaledOrders = ordersArr.map(o => o * (scaleFactor * 0.5)); 
+
     if (salesChart) {
-        salesChart.data.labels             = labels;
-        salesChart.data.datasets[0].data   = earningsArr;
-        salesChart.data.datasets[1].data   = ordersArr;
-        // Refresh gradients on update (canvas may have resized)
-        salesChart.data.datasets[0].backgroundColor = makeGradient(ctx,'rgba(251,113,20,0.55)','rgba(251,113,20,0.04)');
-        salesChart.data.datasets[1].backgroundColor = makeGradient(ctx,'rgba(99,102,241,0.45)','rgba(99,102,241,0.03)');
+        salesChart.data.labels = labels;
+        salesChart.data.datasets.data = earningsArr;
+        salesChart.data.datasets.data = scaledOrders;
         salesChart.update('active');
         return;
     }
@@ -166,48 +176,30 @@ function updateSalesChart(hourlyData) {
                     label: 'Earnings (₹)',
                     data: earningsArr,
                     borderColor: '#f97316',
-                    backgroundColor: makeGradient(ctx,'rgba(251,113,20,0.55)','rgba(251,113,20,0.04)'),
+                    backgroundColor: makeGradient(ctx, 'rgba(251,113,20,0.55)', 'rgba(251,113,20,0.04)'),
                     borderWidth: 2.5,
-                    tension: 0.42,
-                    fill: true,
-                    pointRadius: 4,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#f97316',
-                    pointBorderWidth: 2.5,
-                    pointHoverBackgroundColor: '#f97316',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2,
-                    // Glow shadow via plugin
-                    shadowOffsetX: 0, shadowOffsetY: 4,
-                    shadowBlur: 12,
-                    shadowColor: 'rgba(249,115,22,0.35)'
+                    tension: 0.4,
+                    fill: true
                 },
                 {
                     label: 'Orders',
-                    data: ordersArr,
+                    data: scaledOrders,
                     borderColor: '#6366f1',
-                    backgroundColor: makeGradient(ctx,'rgba(99,102,241,0.45)','rgba(99,102,241,0.03)'),
+                    backgroundColor: makeGradient(ctx, 'rgba(99,102,241,0.45)', 'rgba(99,102,241,0.03)'),
                     borderWidth: 2.5,
-                    tension: 0.42,
-                    fill: true,
-                    pointRadius: 4,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#6366f1',
-                    pointBorderWidth: 2.5,
-                    pointHoverBackgroundColor: '#6366f1',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
+                    tension: 0.4,
+                    fill: true
                 }
             ]
         },
         options: sharedLineOptions({
-            title:  (items) => `🕐 ${items[0].label}`,
-            label:  (ctx)  => {
+            title: (items) => `🕐 ${items.label}`,
+            label: (ctx) => {
                 if (ctx.dataset.label.startsWith('Earnings'))
-                    return `  💰 Earnings: ₹${ctx.raw.toLocaleString('en-IN')}`;
-                return `  📦 Orders: ${Math.round(ctx.raw / 60)}`;
+                    return ` 💰 Earnings: ₹${ctx.raw.toLocaleString('en-IN')}`;
+                // Original value show karne ke liye scale wapas reverse kiya
+                const originalOrders = Math.round(ctx.raw / (scaleFactor * 0.5));
+                return ` 📦 Orders: ${originalOrders}`;
             }
         }),
         plugins: [shadowPlugin]
