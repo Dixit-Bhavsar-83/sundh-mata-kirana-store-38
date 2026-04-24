@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="shortcut icon" href="icon.jpg" type="image/x-icon">
+
+<meta name="theme-color" content="#f97316">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Panel</title>
@@ -58,23 +63,34 @@
         </div>
     </button>
 
+     <button onclick="goTo('delivery')" class="btn-card bg-white p-6 rounded-[2rem] shadow-lg flex items-center gap-6 transition-all duration-500 hover:-translate-y-2 active:scale-95 text-left">
+        <div class="w-16 h-16 bg-purple-100 text-red-500 rounded-2xl flex items-center justify-center text-2xl">
+            <i class="fa-sharp fa-solid fa-scroll"></i>
+        </div>
+        <div>
+            <h2 class="text-xl font-black text-slate-800">Delivery Boy Panel</h2>
+            <p class="text-sm text-zinc-400 font-medium">Check order Data</p>
+        </div>
+    </button>
+
 </div>
 
-<script>
-    function goTo(type) {
-        const btn = event.currentTarget;
-        btn.style.transform = "scale(0.9)";
-        
-        setTimeout(() => {
-            // ✅ /frontend/ mat lagao - seedha path likho
-            if(type === 'customer') window.location.href = "/customer/login.html";
-            if(type === 'owner') window.location.href = "/owner/login.html";
-            if(type === 'panel') window.location.href = "/penal/penal.html";
-        }, 200);
-    }
 
-    document.body.style.zoom = "90%";
+ <script>
+ function goTo(type) {
+    const btn = event.currentTarget;
+    btn.style.transform = "scale(0.9)";
+    
+    setTimeout(() => {
+        // Changed paths to be relative (removed the starting /)
+        if(type === 'customer') window.location.href = "customer/login.html";
+        if(type === 'owner') window.location.href = "owner/login.html";
+        if(type === 'panel') window.location.href = "penal/penal.html"; 
+        if(type === 'delivery') window.location.href = "delivery-panel/delivery.html";
+    }, 200);
+}
 </script>
+
 
 </body>
 </html>
