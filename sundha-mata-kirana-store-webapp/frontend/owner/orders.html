@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=0.85, maximum-scale=1.0, user-scalable=no">
+    <title>Live Orders - Sundha Mata Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Detail overlay transition */
+        #detailOverlay { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #detailOverlay.hidden { opacity: 0; visibility: hidden; display: none; }
+        #detailOverlay:not(.hidden) { opacity: 1; visibility: visible; display: block; }
+
+        /* New order slide-in animation */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .order-card-new { animation: slideInUp 0.35s ease forwards; }
+
+        /* Pulse for new/pending orders */
+        @keyframes pendingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.35); }
+            50%       { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+        }
+        .pending-card { animation: pendingPulse 2.5s ease-in-out infinite; }
+
+        /* Live dot */
+        @keyframes liveDot {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+        .live-dot { animation: liveDot 1.2s ease-in-out infinite; }
+
+        /* Bottom slide-up for new order toast */
+        @keyframes toastIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { transform: translateY(0); opacity: 1; }
+            to   { transform: translateY(100px); opacity: 0; }
+        }
+        .toast-in  { animation: toastIn  0.4s cubic-bezier(0.175,0.885,0.32,1.1) forwards; }
+        .toast-out { animation: toastOut 0.35s ease-in forwards; }
+
+        /* Accepted green pulse */
+        @keyframes acceptedGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+            50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+        }
+        .accepted-pulse { animation: acceptedGlow 3s ease-in-out infinite; }
+
+        /* Empty state icon bounce */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-8px); }
+        }
+        .bounce-icon { animation: bounce 2s ease-in-out infinite; }
+
+        /* Mobile-first scaling fix */
+html {
+    font-size: 14px; /* Default size kam kiya */
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    width: 100%;
+    overflow-x: hidden; /* Side scrolling roko */
+    margin: 0;
+    padding: 0;
+}
+
+/* Icons aur UI elements ko chhota aur normal karne ke liye */
+i, .fa-solid, .fas {
+    font-size: 0.9rem !important; 
+}
+
+.bnav-item, nav button {
+    padding: 8px !important;
+    font-size: 0.7rem !important;
+}
+
+/* Card aur container resizing */
+.user-card, .product-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+}
+
+/* Nav bar fix */
+nav {
+    height: 60px !important;
+    padding: 5px !important;
+}
+    </style>
+</head>
+<body class="bg-slate-50 font-sans pb-28">
+
+    <!-- HEADER -->
+    <header class="p-6 bg-white flex justify-between items-center shadow-sm sticky top-0 z-10">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Live Orders</h1>
+            <p class="text-xs font-bold text-orange-500 tracking-widest uppercase flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-orange-500 rounded-full live-dot inline-block"></span>
+                Real-Time · Auto Refresh
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full font-bold text-sm border border-orange-100">
+                <span id="activeCount">0</span> Pending
+            </div>
+        </div>
+    </header>
+
+    <!-- SEARCH -->
+    <div class="px-6 mt-4">
+        <div class="relative">
+            <i class="fa fa-search absolute left-4 top-4 text-slate-400 text-sm"></i>
+            <input id="searchInput" type="text" placeholder="Search by name, phone or ID…"
+                class="w-full p-4 pl-11 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-orange-200 outline-none text-slate-600 bg-white text-sm">
+        </div>
+    </div>
+
+    <!-- ── PENDING ORDERS SECTION ── -->
+    <section class="px-6 mt-6">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 bg-orange-500 rounded-full live-dot"></span>
+            <h2 class="text-base font-extrabold text-slate-700 uppercase tracking-wide">Pending Orders</h2>
+            <span id="pendingCount" class="ml-auto bg-orange-100 text-orange-600 text-xs font-black px-3 py-0.5 rounded-full">0</span>
+        </div>
+        <div id="pendingList" class="space-y-4"></div>
+    </section>
+
+    <!-- ── ACCEPTED ORDERS SECTION ── -->
+    <section class="px-6 mt-8">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+            <h2 class="text-base font-extrabold text-slate-700 uppercase tracking-wide">Accepted Orders</h2>
+            <span id="acceptedCount" class="ml-auto bg-green-100 text-green-600 text-xs font-black px-3 py-0.5 rounded-full">0</span>
+        </div>
+        <div id="acceptedList" class="space-y-4"></div>
+    </section>
+
+    <!-- ── ORDER DETAIL OVERLAY ── -->
+    <div id="detailOverlay" class="fixed inset-0 bg-white z-50 hidden overflow-y-auto">
+        <header class="p-5 bg-white flex items-center gap-4 border-b sticky top-0 z-10 shadow-sm">
+            <button onclick="closeDetails()" class="text-slate-800 text-lg p-2 hover:bg-slate-100 rounded-full transition">
+                <i class="fa fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="text-lg font-extrabold text-slate-800">Order Details</h1>
+                <p class="text-xs text-slate-400" id="detOrderMeta"></p>
+            </div>
+            <div class="ml-auto bg-orange-50 text-orange-600 px-3 py-1 rounded-full font-bold text-xs border border-orange-100">
+                <span id="detActiveCount">0</span> Pending
+            </div>
+        </header>
+
+        <div class="p-6 space-y-6 pb-36">
+
+            <!-- Order ID + Date/Time -->
+            <div class="bg-slate-50 rounded-3xl p-4 flex justify-between items-center border border-slate-100">
+                <div>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Order ID</p>
+                    <p class="font-black text-slate-800 text-lg mt-0.5" id="detOrderId">#—</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Date & Time</p>
+                    <p class="font-bold text-slate-700 text-sm mt-0.5" id="detDateTime">—</p>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Items Ordered</p>
+                <div id="itemsContainer" class="space-y-4 bg-white rounded-3xl p-5 shadow-sm border border-slate-100"></div>
+            </div>
+
+            <!-- Total -->
+            <div class="bg-orange-50 rounded-3xl p-5 flex justify-between items-center border border-orange-100">
+                <p class="font-black text-slate-700 text-lg">Total Amount</p>
+                <p class="font-black text-orange-600 text-2xl" id="detTotal">₹0</p>
+            </div>
+
+            <!-- Customer Info -->
+            <div>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Customer Info</p>
+                <div class="bg-slate-50 p-5 rounded-3xl space-y-4 border border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                            <i class="fa fa-user text-slate-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Full Name</p>
+                            <span id="detName" class="font-bold text-lg text-slate-700"></span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                            <i class="fa fa-phone text-slate-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Phone</p>
+                            <span id="detPhone" class="font-bold text-lg text-slate-700"></span>
+                        </div>
+                    </div>
+                    <!-- Profession Row -->
+                    <div class="flex items-center gap-4 profession-row">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                            <i class="fa fa-briefcase text-slate-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Profession</p>
+                            <span id="detProfession" class="font-bold text-lg text-slate-700"></span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="fa fa-map-marker-alt text-slate-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Delivery Address</p>
+                            <span id="detAddr" class="text-slate-600 font-medium leading-relaxed text-sm block mt-0.5"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="callBtn"
+                    class="bg-[#2ecc71] text-white py-5 rounded-[1.5rem] font-bold flex justify-center items-center gap-3 text-lg shadow-lg active:scale-95 transition-transform">
+                    <i class="fa fa-phone"></i> Call
+                </button>
+                <button id="shareBtn"
+                    class="bg-[#1e272e] text-white py-5 rounded-[1.5rem] font-bold flex justify-center items-center gap-3 text-lg active:scale-95 transition-transform">
+                    <i class="fa fa-share-nodes"></i> Share
+                </button>
+            </div>
+
+            <button id="acceptBtn"
+                class="w-full bg-[#f35c15] text-white py-6 rounded-[1.8rem] font-black text-xl tracking-wider uppercase shadow-xl active:scale-95 transition-transform">
+                Accept Order
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ── NEW ORDER TOAST ── -->
+    <div id="newOrderToast" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div class="bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-bold whitespace-nowrap">
+            <span class="text-lg">🔔</span>
+            <span id="toastText">New order received!</span>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-40">
+        <div class="flex justify-between items-center max-w-md mx-auto text-slate-400">
+            <a href="dashboard.html" class="flex flex-col items-center hover:text-orange-500 transition">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Home</span>
+            </a>
+            <a href="orders.html" class="flex flex-col items-center text-orange-500 scale-110">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Orders</span>
+            </a>
+            <a href="products.html" class="flex flex-col items-center hover:text-orange-500 transition">
+                <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Stock</span>
+            </a>
+            <a href="settings.html" class="flex flex-col items-center hover:text-orange-500 transition">
+                <i class="fa-solid fa-user-gear text-xl"></i>
+                <span class="text-[10px] font-bold mt-1">Profile</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/orders.js"></script>
+</body>
+</html>
